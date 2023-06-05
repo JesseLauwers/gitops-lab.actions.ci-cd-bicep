@@ -1,0 +1,39 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+env:
+  AZURE_RG: RG2
+  AZURE_SUBSCRIPTION: d2eabfb8-a030-4309-88f5-c342c3ed9918
+  AZURE-LOCATION: WestEurope
+  
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore: 
+      - README.md
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+  
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      configuration: release
+    steps:
+    - name: Checkout Sources
+      uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2.0.0
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore --configuration ${{ env.configuration }}
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration ${{ env.configuration }}
+    - name: Publish 
+      run: dotnet publish --configuration ${{ env.configuration }} --output ${{runner.temp }}/publish
